@@ -1,0 +1,21 @@
+#:kivy 1.8.0
+
+<Helicopter>
+
+    canvas:
+            pos: self.pos
+            size: self.size
+
+<HelicopterGame>
+	line: line_obj
+
+	canvas.before:
+	    Rectangle:
+	    	source: 'Images/Sky_back_layer.png'
+	        pos: self.pos 
+	        size: self.size
+	
+	Helicopter:
+		id: line_obj
+		
+	
