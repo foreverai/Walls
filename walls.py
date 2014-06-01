@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-#scren size is 800. have between 0 and 800 with 100 intervals for x. randomise y instaed of adding on.
-#make a function which just updates the line with the new points each time
-
 import kivy
 kivy.require('1.8.0')
 
@@ -21,50 +18,33 @@ from kivy.graphics import Rectangle
 from kivy.uix.label import Label
 
 class BezierLine(Widget):
+    x_list=[]
+    y_list=[]
+    velocity=10; count=0; old_random=0; new_random=0; change=0;
 
     def __init__(self, points=[], loop=False, *args, **kwargs):
         super(BezierLine, self).__init__(*args, **kwargs)
-        self.points = points
+        self.points = self.initialise_points()
         self.loop = loop
-        
 
         with self.canvas:
-            #Color(1.0, 0.0, 0.0)
+            Color(1.0, 0.0, 0.0)
 
             self.bezier = Bezier(
                     points=self.points,
                     segments=180,
                     loop=self.loop,
                     )
- 
-class HelicopterGame(Widget):
-    x_list=[]
-    y_list=[]
-    line=ObjectProperty(None)
-    back_scroll_speed = NumericProperty(0.1)
 
-    def __init__(self, **kw):
-        super(HelicopterGame, self).__init__(**kw)
-
-        with self.canvas.before:
-            texture = CoreImage('Images/background.png').texture
-            texture.wrap = 'repeat'
-            self.scroll_back = Rectangle(texture=texture, size=self.size, pos=self.pos)
-            self.x_list=range(0,900,100)
-            self.y_list=self.generate_random_list()
-            Clock.schedule_interval(self.update, 0)
-
-        
-        #Clock.schedule_interval(self.update, 1)
-
-    def scroll_background(self, *l):
-        t = Clock.get_boottime()
-        self.scroll_back.tex_coords = -(t * self.back_scroll_speed), 0, -(t * self.back_scroll_speed + 1), 0,  -(t * self.back_scroll_speed + 1), -1, -(t * self.back_scroll_speed), -1 
+    def initialise_points(self):
+        self.x_list=range(-100,1000,100)
+        self.y_list=self.generate_random_list()
+        return self.merge_lists(self.x_list, self.y_list)
 
     def generate_random_list(self):
         y=[]
-        for i in range(0,9,1):
-            y.extend([random.randint(200,400)])
+        for i in range(-1,10,1):
+            y.extend([random.randint(0,200)])
         return y
 
     def merge_lists(self, x, y):
@@ -75,26 +55,57 @@ class HelicopterGame(Widget):
         return b_list
 
     def flow_y(self,y):
+#make a random number every 10
+#for the next 10 iterations, add on a certain amount (percentage) until the number is reached
+#then create a new random number and repeat
+#the number 10 should be the speed
+
         y_list=[]
-        for i in range(len(y)-1):
+        y_length=len(y)
+        for i in range(y_length-1):
             y_list.extend([y[i+1]])
-        y_list.extend([random.randint(200,400)])
+
+        # self.count+=1
+        # if (self.count==self.velocity):
+        #     self.count=0
+        #     self.old_random=self.new_random
+        #     self.new_random=random.randint(0,200)
+        #     self.change=(self.new_random-self.old_random)/self.velocity
+        # print self.change #why is this different?
+        y_list.extend([y_list[-1]+self.change])
+
+        y_list.extend([random.randint(0,200)])
         return y_list
+
+    def move(self):
+        self.y_list=self.flow_y(self.y_list)
+        b_list=self.merge_lists(self.x_list,self.y_list)
+        self.bezier.points=b_list
+
+ 
+class HelicopterGame(Widget):
+    line=ObjectProperty(None)
+    back_scroll_speed = NumericProperty(0.1)
+
+    def __init__(self, **kw):
+        super(HelicopterGame, self).__init__(**kw)
+
+        with self.canvas.before:
+            texture = CoreImage('Images/background.png').texture
+            texture.wrap = 'repeat'
+            self.scroll_back = Rectangle(texture=texture, size=self.size, pos=self.pos)
+
+            self.line=BezierLine()
+        
+            Clock.schedule_interval(self.update, 0)
+
+    def scroll_background(self, *l):
+        t = Clock.get_boottime()
+        self.scroll_back.tex_coords = -(t * self.back_scroll_speed), 0, -(t * self.back_scroll_speed + 1), 0,  -(t * self.back_scroll_speed + 1), -1, -(t * self.back_scroll_speed), -1 
 
     def update(self, dt):
         self.scroll_background()
-        #self.y_list=self.generate_random_list()
-        self.y_list=self.flow_y(self.y_list)
-        b_list=self.merge_lists(self.x_list,self.y_list)
-        print b_list
-        #print x_list, y_list
-
-        #self.drawLine()
-
-        #print self.points_all
-        #self.
-        self.add_widget(BezierLine(points=b_list))
-        #return BezierLine(points=b_list)
+        self.line.move()
 
 class TestApp(App):
 
