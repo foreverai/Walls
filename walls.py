@@ -20,7 +20,7 @@ from kivy.uix.label import Label
 class BezierLine(Widget):
     x_list=[]
     y_list=[]
-    velocity=10; count=0; old_random=0; new_random=0;
+    velocity=10; count=0; old_random=0; new_random=0; change=0;
 
     def __init__(self, points=[], loop=False, *args, **kwargs):
         super(BezierLine, self).__init__(*args, **kwargs)
@@ -61,19 +61,18 @@ class BezierLine(Widget):
 #the number 10 should be the speed
 
         y_list=[]
-        change=0
         y_length=len(y)
         for i in range(y_length-1):
             y_list.extend([y[i+1]])
 
-        self.count+=1
-        if (self.count==self.velocity):
-            self.count=0
-            self.old_random=self.new_random
-            self.new_random=random.randint(0,200)
-            change=(self.new_random-self.old_random)/10
-        print change
-
+        # self.count+=1
+        # if (self.count==self.velocity):
+        #     self.count=0
+        #     self.old_random=self.new_random
+        #     self.new_random=random.randint(0,200)
+        #     self.change=(self.new_random-self.old_random)/self.velocity
+        # print self.change #why is this different?
+        y_list.extend([y_list[-1]+self.change])
 
         y_list.extend([random.randint(0,200)])
         return y_list
