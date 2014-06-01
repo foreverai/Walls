@@ -21,13 +21,11 @@ from kivy.graphics import Rectangle
 from kivy.uix.label import Label
 
 class BezierLine(Widget):
-
     def __init__(self, points=[], loop=False, *args, **kwargs):
         super(BezierLine, self).__init__(*args, **kwargs)
         self.points = points
         self.loop = loop
         
-
         with self.canvas:
             #Color(1.0, 0.0, 0.0)
 
@@ -36,6 +34,10 @@ class BezierLine(Widget):
                     segments=180,
                     loop=self.loop,
                     )
+
+    def move(self, points):
+        self.bezier.points=points
+
  
 class HelicopterGame(Widget):
     x_list=[]
@@ -50,12 +52,14 @@ class HelicopterGame(Widget):
             texture = CoreImage('Images/background.png').texture
             texture.wrap = 'repeat'
             self.scroll_back = Rectangle(texture=texture, size=self.size, pos=self.pos)
-            self.x_list=range(0,900,100)
+            
+            self.x_list=range(-100,1000,100)
             self.y_list=self.generate_random_list()
-            Clock.schedule_interval(self.update, 0)
 
+            b_list=self.merge_lists(self.x_list, self.y_list)
+            self.line=BezierLine(points=b_list)
         
-        #Clock.schedule_interval(self.update, 1)
+            Clock.schedule_interval(self.update, 0)
 
     def scroll_background(self, *l):
         t = Clock.get_boottime()
@@ -63,8 +67,8 @@ class HelicopterGame(Widget):
 
     def generate_random_list(self):
         y=[]
-        for i in range(0,9,1):
-            y.extend([random.randint(200,400)])
+        for i in range(-1,10,1):
+            y.extend([random.randint(0,200)])
         return y
 
     def merge_lists(self, x, y):
@@ -78,23 +82,16 @@ class HelicopterGame(Widget):
         y_list=[]
         for i in range(len(y)-1):
             y_list.extend([y[i+1]])
-        y_list.extend([random.randint(200,400)])
+        y_list.extend([random.randint(0,200)])
         return y_list
 
     def update(self, dt):
         self.scroll_background()
-        #self.y_list=self.generate_random_list()
+
         self.y_list=self.flow_y(self.y_list)
         b_list=self.merge_lists(self.x_list,self.y_list)
-        print b_list
-        #print x_list, y_list
 
-        #self.drawLine()
-
-        #print self.points_all
-        #self.
-        self.add_widget(BezierLine(points=b_list))
-        #return BezierLine(points=b_list)
+        self.line.move(b_list)
 
 class TestApp(App):
 
