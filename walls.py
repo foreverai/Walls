@@ -20,7 +20,11 @@ from kivy.uix.label import Label
 class BezierLine(Widget):
     x_list=[]
     y_list=[]
-    velocity=10; count=0; old_random=0; new_random=0; change=0;
+    start_point=-300
+    end_point=1400
+    point_step=100
+    velocity=7
+    update_y=False
 
     def __init__(self, points=[], loop=False, *args, **kwargs):
         super(BezierLine, self).__init__(*args, **kwargs)
@@ -37,13 +41,13 @@ class BezierLine(Widget):
                     )
 
     def initialise_points(self):
-        self.x_list=range(-100,1000,100)
+        self.x_list=range(self.start_point,self.end_point,self.point_step)
         self.y_list=self.generate_random_list()
         return self.merge_lists(self.x_list, self.y_list)
 
     def generate_random_list(self):
         y=[]
-        for i in range(-1,10,1):
+        for i in range(self.start_point,self.end_point,self.point_step):
             y.extend([random.randint(0,200)])
         return y
 
@@ -54,34 +58,36 @@ class BezierLine(Widget):
             b_list.extend([y[i]])
         return b_list
 
-    def flow_y(self,y):
-#make a random number every 10
-#for the next 10 iterations, add on a certain amount (percentage) until the number is reached
-#then create a new random number and repeat
-#the number 10 should be the speed
+    def flow_x(self,x):
+        self.update_y=False
+        x_list=[]
+        x_length=len(x)
+        x_limit=self.end_point-self.point_step
+        for i in range(x_length):
+            x_list.extend([x[i]-self.velocity])
+        if(x[-1]<=x_limit):
+            x_list.pop(0)
+            x_list.extend([self.end_point])
+            self.update_y=True
+        return x_list
 
+    def flow_y(self,y):
         y_list=[]
         y_length=len(y)
-        for i in range(y_length-1):
-            y_list.extend([y[i+1]])
-
-        # self.count+=1
-        # if (self.count==self.velocity):
-        #     self.count=0
-        #     self.old_random=self.new_random
-        #     self.new_random=random.randint(0,200)
-        #     self.change=(self.new_random-self.old_random)/self.velocity
-        # print self.change #why is this different?
-        y_list.extend([y_list[-1]+self.change])
-
-        y_list.extend([random.randint(0,200)])
+        
+        if(self.update_y):
+            for i in range(y_length-1):
+                y_list.extend([y[i+1]])
+            y_list.extend([random.randint(0,200)])
+        else:
+            return y
         return y_list
 
     def move(self):
+        self.x_list=self.flow_x(self.x_list)
         self.y_list=self.flow_y(self.y_list)
         b_list=self.merge_lists(self.x_list,self.y_list)
         self.bezier.points=b_list
-
  
 class HelicopterGame(Widget):
     line=ObjectProperty(None)
@@ -96,7 +102,6 @@ class HelicopterGame(Widget):
             self.scroll_back = Rectangle(texture=texture, size=self.size, pos=self.pos)
 
             self.line=BezierLine()
-        
             Clock.schedule_interval(self.update, 0)
 
     def scroll_background(self, *l):
