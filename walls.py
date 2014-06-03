@@ -34,7 +34,6 @@ class BezierLine(Widget):
 
     velocity=5
     update_y=False
-    #add choice for y values when an object is made
 
     def __init__(self, *args, **kwargs):
         super(BezierLine, self).__init__(*args, **kwargs)
@@ -100,9 +99,8 @@ class BezierLine(Widget):
             for i in range(y_length-1):
                 y_list.extend([y[i+1]])
             y_list.extend([random.randint(self.y_start,self.y_end)])
-        else:
-            return y
-        return y_list
+            return y_list
+        return y
 
     def move(self):
         self.x_list=self.flow_x(self.x_list)
