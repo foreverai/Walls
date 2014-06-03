@@ -18,21 +18,15 @@ from kivy.graphics import Rectangle
 from kivy.uix.label import Label
 
 class BezierLine(Widget):
-    points_a=[]
-    points_b=[]
+    points_a=[]; points_b=[]
+    x_list=[]; y_list=[]
+    x_start=-300; x_end=1400; x_step=100
+    #for later, we can slowly increase y end to make the gap between the walls thinner
+    y_start=0; y_end=200; y_diff=600-y_end
 
-    x_list=[]
-    y_list=[]
-
-    x_start=-300
-    x_end=1400
-    x_step=100
-
-    y_start=0
-    y_end=200
-    y_diff=600-y_end
-
+    #maybe also increase velocity slowly
     velocity=5
+
     update_y=False
 
     def __init__(self, *args, **kwargs):
